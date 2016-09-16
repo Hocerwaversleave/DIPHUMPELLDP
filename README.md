@@ -1,15 +1,21 @@
 # DIPHUMPELLDP
-Die Repository für Roboter Synchronisation
+Die Repository für Roboter Synchronisation - Diplomarbeit durchgeführt an der HTL St. Pölten 2016
 
-CODE TOGHETER ONCE AND EVER
+Short Description:
 
-Mein Kollege und ich werden uns gegenseitig motivieren, eine sinnvolle Dokumentation
-zu verfassen.
+Four µCs of type Atmega32u4. Two µCs for one roboter respectively. One µC does control two DC-motors, while the other does the communication over RF.
 
-Wir weisen uns gegenseitig auf Lücken hin.
+Used RF-Device: NRF024L01+ - Nordic Semiconductors (Breakout from Sparkfun)
+Used Port Expander: MCP23017
 
-Ich konzentriere mich auf Software, er konzentriert sich auf Hardware.
+Brief Indroduction to programm flow:
+1> µC1 sends information via I2C on PE
+2> µC2 reads the date just written and sends it via SPI on one RF-chip
+3> µC3 gets an interrupt from another RF-chip and thus fetches the data and writes it on another Port Expander
+4> µC4 gets hold of the data and controls the DC Motors accordingly to it
 
-Und dazwischen helfen wir uns gegenseitig um einen verständlichen Zusammenhang in unserer
+Notes about functions of the RF-chip:
+Bidirectional automatic packet handling up to 2Mbit/s
 
-Dokumentation entstehen zu lassen.
+
+
