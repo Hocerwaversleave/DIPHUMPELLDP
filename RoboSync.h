@@ -54,6 +54,7 @@
 
 #define CONFIGPTX 0x00
 #define CONFIGPTXV 0x0a
+#define CONFIGPTXVPRX 0x0b
 
 //Robo State Codes:
 #define ELSTOPMOTO 0x01
