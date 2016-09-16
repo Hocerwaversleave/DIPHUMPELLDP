@@ -1,19 +1,21 @@
 /*
- * ELRoboterSlaveCommunication.c
+ * ELRoboterSlaveEndpoint.c
  *
- * Created: 08.09.2016 19:40:29
+ * Created: 08.09.2016 20:10:13
  * Author : 1
  */ 
 
 #include <avr/io.h>
 #include <stdint.h>
+#include <avr/interrupt.h>
 #include <avr/sfr_defs.h>
+#include <avr/wdt.h>
 #include "RoboSync.h"
 
 void handle_mcucsr(void)
 __attribute__((section(".init3")))
 __attribute__((naked));
-void handle_mcucsr(void){
+void handle_mcucsr(void) {
 	MCUSR = 0;
 	
 	MCUCR |= _BV(JTD);
@@ -21,79 +23,60 @@ void handle_mcucsr(void){
 	CLKPR = _BV(7);
 	CLKPR = _BV(0);
 	
-	PRR0 = _BV(PRTIM1) | _BV(PRADC);
+	PRR0 = _BV(PRTIM1) | _BV(PRSPI) | _BV(PRADC);
 	PRR1 = _BV(PRUSB) | _BV(PRTIM3) | _BV(PRUSART1);
-	ACSR |= _BV(ACD);
+	ACSR |= _BV(ACD);	
+	
+}
+
+volatile uint16_t milisecs;
+
+ISR(TIMER0_OVF_vect) {
+	GPIOR1++;
+	if(GPIOR1 > GPIOR2) {
+		GPIOR1 = 0;
+		milisecs++;
+	}
+}
+ISR(WDT_vect) {
+	drive(0,0);
+	if(milisecs > WDTMILISECMX)
+		milisecs = 0;
+	wdt_reset();
 }
 
 int 
 main(void) {
+	uint8_t contentPE;
 	iocon();
-	writePE(IOCON,IOCONV);
-	writePE(IODIRA,IODIRABV);
-	writePE(IODIRB,IODIRABV);
-	write_register_NRF(SETUP_RETR,SETUP_RETRV);
-	write_register_NRF(RF_CHPTX,RF_CHPTXV);
-	write_register_NRF(RF_SETUP,RF_SETUPV);
-	write_register_NRF(RX_PW_P0PTX,RX_PW_P0PTXV);
-	write_register_NRF(FEATUREPTX,FEATUREPTXV);
-	write_register_NRF(DYNPDPTX,DYNPDPTXV);
-	write_register_NRF(CONFIGPTX,CONFIGPTXVPRX);
-	
 	PCIFR |= _BV(PCIF0);
-	write_fifo_NRF(RFALLOKAY);
-    PORTB |= _BV(SPI_CE);
-	for(;;) {
+    for(;;) {
 		loop_until_bit_is_set(PCIFR,PCIF0);
-		read_status_NRF();
-		PORTB &= ~_BV(SPI_CE);
+		wdt_reset();
+		readPE(&contentPE, GPIOA);
+		milisecs = 0;
+		PCIFR |= _BV(PCIF0);
+		wait(&milisecs, MILISECSTOGOENDPOINT);
 		
-		switch (GPIOR2) {
-			case STATUSPTXCLEARACKPAY:
-			read_fifo_NRF();
-			break;
-			case STATUSPTXCLEAR_DR:
-			read_fifo_NRF();
-			break;
-			default:
-			GPIOR1 = ELERROR;
-		}
-		
-		switch(GPIOR1){
+		switch(contentPE){
 			case ELSTOPMOTO:
-			writePE(OLATA,ELSTOPMOTO);
-			SignalForOtherMCU();
-			write_fifo_NRF(RFALLOKAY);
+			drive(0,0);
 			break;
 			case ELFORWARDS:
-			writePE(OLATA,ELFORWARDS);
-			SignalForOtherMCU();
-			write_fifo_NRF(RFLEDFRIG);
+			drive(3,3);
 			break;
 			case ELBACKWARD:
-			writePE(OLATA,ELBACKWARD);
-			SignalForOtherMCU();
-			write_fifo_NRF(RFLEDBRIG);
+			drive(-3,-3);
 			break;
 			case ELTURNRIGH:
-			writePE(OLATA,ELTURNRIGH);
-			SignalForOtherMCU();
-			write_fifo_NRF(RFLEDFLEF);
+			drive(3,-3);
 			break;
 			case ELTURNLEFT:
-			writePE(OLATA,ELTURNLEFT);
-			SignalForOtherMCU();
-			write_fifo_NRF(RFLEDBLEF);
+			drive(-3,3);
 			break;
 			default:
-			writePE(OLATA,ELERROR);
-			SignalForOtherMCU();
-			write_fifo_NRF(ELERROR);
+			drive(0,0);
 		}
-		
-		PCIFR |= _BV(PCIF0);
-		write_register_NRF(STATUSPTX,STATUSPTXCLEARALL);
-		PORTB |= _BV(SPI_CE);
     }
 }
 
