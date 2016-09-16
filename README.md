@@ -1,5 +1,6 @@
 # RobotSync_via_RF
-Die Repository für Roboter Synchronisation - Diplomarbeit durchgeführt an der HTL St. Pölten 2016
+
+Diploma thesis - HTL St. Pölten 2016
 
 Short Description:
 
