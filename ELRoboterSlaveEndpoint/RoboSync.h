@@ -68,7 +68,7 @@
 #define RFNEWSTAT 0x30//New Speed Statistic comes at next PE UPDATE
 #define RFTIMEOUT 0x50//5min SleepMode Please
 #define RFALLOKAY 0x21//Just say hello
-#define RFLEDFRIG 0x31//LED Signaling (can be a 360Â° IR-LED with Sensor for estimating distance)
+#define RFLEDFRIG 0x31//LED Signaling (can be a 360° IR-LED with Sensor for estimating distance)
 #define RFLEDBRIG 0x41//
 #define RFLEDFLEF 0x71//
 #define RFLEDBLEF 0x81//
