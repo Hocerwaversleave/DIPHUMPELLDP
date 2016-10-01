@@ -9,10 +9,10 @@ Four µCs of type Atmega32u4. Two µCs for one roboter respectively. One µC doe
 Used RF-Device: NRF024L01+ - Nordic Semiconductors (Breakout from Sparkfun)
 Used Port Expander: MCP23017
 
-Brief Indroduction to programm flow:
-1) µC1 sends information via I2C on PE
+Brief indroduction to program flow:
+1) µC1 sends information via I2C on PE1
 2) µC2 reads the date just written and sends it via SPI on one RF-chip
-3) µC3 gets an interrupt from another RF-chip and thus fetches the data and writes it on another Port Expander
+3) µC3 gets an interrupt from another RF-chip and thus fetches the data and writes it onto PE2
 4) µC4 gets hold of the data and controls the DC Motors accordingly to it
 
 Notes about functions of the RF-chip:
